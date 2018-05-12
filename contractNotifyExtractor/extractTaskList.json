@@ -1,0 +1,28 @@
+﻿{
+  "taskList": [
+    {
+      //提取NNS标准解析器通知信息
+      "netType": "testnet",
+      "contractHash": "0xabb0f1f3f035dd7ad80ca805fce58d62c517cc6b",
+      "notifyDisplayName": "setResolveData",
+      "notifyStructure": [
+        {
+          "name": "namehash",
+          "type": "ByteArray",
+          "escape": ""
+        },
+        {
+          "name": "protocol",
+          "type": "ByteArray",
+          "escape": "String"
+        },
+        {
+          "name": "data",
+          "type": "ByteArray",
+          "escape": "String"
+        }
+      ],
+      "memo": "提取NNS标准解析器通知信息"
+    }
+  ]
+}
