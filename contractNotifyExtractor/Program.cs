@@ -33,8 +33,10 @@ namespace contractNotifyExtractor
         static private bool extractNotifyInfo(string taskID,JObject task,string readConnStr, string readDBname,string writeConnStr, string writeDBname) {
             bool isNewDataExist = false;
 
-            string contractHash = task["contractHash"].ToString();
-            Int64 lastBlockindex = mh.getContractStorageHeight(writeConnStr, writeDBname, contractHash);
+            string taskContractHash = task["contractHash"].ToString();
+            string taskNotifyDisplayName = task["notifyDisplayName"].ToString();
+            JArray JAtaskNotifyStructure = (JArray)task["notifyStructure"];
+            Int64 lastBlockindex = mh.getContractStorageHeight(writeConnStr, writeDBname, taskContractHash);
 
             #region
             //JObject contractStorageHeightTXID = mh.getContractStorageHeight(writeConnStr, writeDBname,contractHash);
@@ -62,7 +64,7 @@ namespace contractNotifyExtractor
             //}
             #endregion
 
-            JArray JA = mh.GetData(readConnStr, readDBname, "notify", "{'notifications.contract':'" + contractHash + "',blockindex:{'$gt':" + lastBlockindex + "}}", "{blockindex:1,txid:1}", 1);
+            JArray JA = mh.GetData(readConnStr, readDBname, "notify", "{'notifications.contract':'" + taskContractHash + "',blockindex:{'$gt':" + lastBlockindex + "}}", "{blockindex:1,txid:1}", 1);
             if (JA.Count > 0)
             {
                 //获取已处理块高度的后一个有指定notify的块高度，并以此高度获取所有指定notify
@@ -80,12 +82,83 @@ namespace contractNotifyExtractor
                     int n = 0;//标记notify在一个tx里的序号
                     foreach (JObject Jnotify in JAnotifications)
                     {
-                        if (Jnotify["contract"].ToString() == contractHash)
+                        JArray JAstate = (JArray)Jnotify["state"]["value"];
+
+                        string dataContractHash = Jnotify["contract"].ToString();
+                        string dataNotifyDisplayName = JAstate[0]["value"].ToString().Hexstring2String();
+                        if (dataContractHash == taskContractHash && dataNotifyDisplayName == taskNotifyDisplayName)
                         {
-                            Jnotify.Add("blockindex", blockindex);
-                            Jnotify.Add("txid", txid);
-                            Jnotify.Add("n", n);
-                            JAinsertData.Add(Jnotify);
+                            //Jnotify.Add("blockindex", blockindex);
+                            //Jnotify.Add("txid", txid);
+                            //Jnotify.Add("n", n);
+                            
+
+                            //存储解析后数据
+                            JObject JnotifyInfo = new JObject();
+                            //下列三项组合为唯一索引
+                            JnotifyInfo.Add("blockindex", blockindex);
+                            JnotifyInfo.Add("txid", txid);
+                            JnotifyInfo.Add("n", n);
+                            //解析数据
+                            //JnotifyInfo.Add("infoDisplayName", dataNotifyDisplayName);
+
+                            int i = 0;
+                            foreach (JObject Jvalue in JAstate)
+                            {
+                                JObject JtaskEscapeInfo = (JObject)JAtaskNotifyStructure[i];
+                                var JtaskEscapeInfo_escape = (string)JtaskEscapeInfo["escape"];
+                                string notifyType = Jvalue["type"].ToString();
+                                string notifyValue = Jvalue["value"].ToString();
+                                string taskName = JtaskEscapeInfo["name"].ToString();
+
+                                //如果处理失败则不处理（用原值）
+                                switch (JtaskEscapeInfo_escape) {
+                                    case "String"://处理成字符串
+                                        try
+                                        {
+                                            notifyValue = notifyValue.Hexstring2String();
+                                        }
+                                        catch { }
+
+                                        break;
+                                    case "Address"://处理成地址
+                                        try
+                                        {
+                                            notifyValue = ThinNeo.Helper.GetAddressFromScriptHash(notifyValue.HexString2Bytes());
+                                        }
+                                        catch { }
+
+                                        break;
+                                    case "BigInteger"://处理成大整数
+                                        try
+                                        {
+                                            int decimals = int.Parse(JtaskEscapeInfo["decimals"].ToString());
+                                            if (notifyType == "ByteArray")
+                                            {
+                                                notifyValue = notifyValue.getNumStrFromHexStr(decimals);
+                                            }
+                                            else//Integer
+                                            {
+                                                notifyValue = notifyValue.getNumStrFromIntStr(decimals);
+                                            }
+                                        }
+                                        catch { }
+                                        
+                                        break;
+                                    default://未定义，则不处理（用原值）
+                                        break;
+                                }
+
+                                JnotifyInfo.Add(taskName, notifyValue);
+
+                                i++;
+                            }
+
+                            //记录原数据
+                            JnotifyInfo.Add("state", Jnotify["state"]);
+
+                            //加入需要写入的数据的组
+                            JAinsertData.Add(JnotifyInfo);
                         }
 
                         n++;
@@ -96,9 +169,9 @@ namespace contractNotifyExtractor
                 {
                     var a = JAinsertData.ToString();
                     //批量写入一个块的所有定义notify
-                    mh.InsertDataByJarray(writeConnStr, writeDBname, contractHash, JAinsertData);
+                    mh.InsertDataByJarray(writeConnStr, writeDBname, taskContractHash, JAinsertData);
                     //更新处理高度
-                    mh.setContractStorageHeight(writeConnStr, writeDBname, contractHash, doBlockHeight);
+                    mh.setContractStorageHeight(writeConnStr, writeDBname, taskContractHash, doBlockHeight);
                 }
                 catch { }
 

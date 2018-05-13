@@ -7,6 +7,12 @@
       "notifyDisplayName": "setResolveData",
       "notifyStructure": [
         {
+          "name": "displayName", //显示名字
+          "type": "ByteArray", //原类型
+          "escape": "String", //转义为
+          "where": "setResolveData" //满足此条件入库
+        },
+        {
           "name": "namehash",
           "type": "ByteArray",
           "escape": ""
@@ -23,6 +29,37 @@
         }
       ],
       "memo": "提取NNS标准解析器通知信息"
+    },
+    {
+      //提取NNS sGAS 合约transfer
+      "netType": "testnet",
+      "contractHash": "0x4ac464f84f50d3f902c2f0ca1658bfaa454ddfbf",
+      "notifyDisplayName": "transfer",
+      "notifyStructure": [
+        {
+          "name": "displayName", //显示名字
+          "type": "ByteArray", //原类型
+          "escape": "String", //转义为
+          "where": "transfer" //满足此条件入库
+        },
+        {
+          "name": "from",
+          "type": "ByteArray",
+          "escape": "Address"
+        },
+        {
+          "name": "to",
+          "type": "ByteArray",
+          "escape": "Address"
+        },
+        {
+          "name": "value",
+          "type": "ByteArray|Integer",
+          "escape": "BigInteger",
+          "decimals": 8
+        }
+      ],
+      "memo": "提取NNS sGAS 合约transfer"
     }
   ]
 }
