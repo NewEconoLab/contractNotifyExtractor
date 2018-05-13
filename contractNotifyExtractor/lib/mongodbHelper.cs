@@ -60,5 +60,74 @@ namespace contractNotifyExtractor.lib
 
             client = null;
         }
+
+        public Int64 getContractStorageHeight(string mongodbConnStr, string mongodbDatabase, string contractHash)
+        {
+            var client = new MongoClient(mongodbConnStr);
+            var database = client.GetDatabase(mongodbDatabase);
+            var collection = database.GetCollection<BsonDocument>("contractStorageHeight");
+
+            var queryBson = BsonDocument.Parse("{contractHash:'" + contractHash + "'}");
+            var query = collection.Find(queryBson).ToList();
+            client = null;
+
+            if (query.Count == 0)
+            {
+                return -1;
+            }
+            else
+            {
+                return Int64.Parse(query[0]["lastBlockindex"].ToString());
+            }
+        }
+
+        public void setContractStorageHeight(string mongodbConnStr, string mongodbDatabase, string contractHash, Int64 lastBlockindex)
+        {
+            var client = new MongoClient(mongodbConnStr);
+            var database = client.GetDatabase(mongodbDatabase);
+            var collection = database.GetCollection<BsonDocument>("contractStorageHeight");
+
+            var setBson = BsonDocument.Parse("{contractHash:'" + contractHash + "',lastBlockindex:" + lastBlockindex + "}");
+
+            var queryBson = BsonDocument.Parse("{contractHash:'" + contractHash + "'}");
+            var query = collection.Find(queryBson).ToList();
+            if (query.Count == 0)
+            {
+                collection.InsertOne(setBson);
+            }
+            else
+            {
+                collection.ReplaceOne(queryBson, setBson);
+            }
+
+            client = null;
+        }
+
+        //public bool checkIsStoragedInBlock(string mongodbConnStr, string mongodbDatabase,Int64 blockindex,string txid)
+        //{
+        //    var client = new MongoClient(mongodbConnStr);
+        //    var database = client.GetDatabase(mongodbDatabase);
+        //    var collection = database.GetCollection<BsonDocument>("notify");
+
+        //    var queryBson = BsonDocument.Parse("{blockindex:" + blockindex + "}");
+        //    var query = collection.Find(queryBson).Sort("{txid:-1}").Limit(1).ToList();
+        //    client = null;
+
+        //    if (query.Count == 0)
+        //    {
+        //        return false;
+        //    }
+        //    else
+        //    {
+        //        if (query[0]["txid"].AsString == txid)
+        //        {
+        //            return true;
+        //        }
+        //        else
+        //        {
+        //            return false;
+        //        }
+        //    }
+        //}
     }
 }
