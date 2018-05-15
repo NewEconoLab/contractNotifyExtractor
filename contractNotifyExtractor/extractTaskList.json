@@ -60,6 +60,81 @@
         }
       ],
       "memo": "提取NNS sGAS 合约transfer"
+    },
+    {
+      //提取NNS 域名中心 合约changeOwnerInfo
+      "netType": "testnet",
+      "contractHash": "0x1ff70bb2147cf56c8b1ce0eb09323eb2b3f57916",
+      "notifyDisplayName": "changeOwnerInfo",
+      "notifyStructure": [
+        {
+          "name": "displayName", //显示名字
+          "type": "ByteArray", //原类型
+          "escape": "String", //转义为
+          "where": "changeOwnerInfo" //满足此条件入库
+        },
+        {
+          "name": "namehash",
+          "type": "ByteArray",
+          "escape": ""
+        },
+        {
+          "name": "array",
+          "type": "Array",
+          "escape": "ArrayExpansion",
+          "arrayData": [
+            {
+              "name": "owner",
+              "type": "ByteArray",
+              "escape": "Address"
+            },
+            {
+              "name": "register",
+              "type": "ByteArray",
+              "escape": ""
+            },
+            {
+              "name": "resolver",
+              "type": "ByteArray",
+              "escape": ""
+            },
+            {
+              "name": "TTL",
+              "type": "ByteArray|Integer",
+              "escape": "BigInteger",
+              "decimals": 0
+            },
+            {
+              "name": "parentOwner",
+              "type": "ByteArray",
+              "escape": "Address"
+            },
+            {
+              "name": "domain",
+              "type": "ByteArray",
+              "escape": "String"
+            },
+            {
+              "name": "parenthash",
+              "type": "ByteArray",
+              "escape": ""
+            },
+            {
+              "name": "root",
+              "type": "ByteArray|Integer",
+              "escape": "BigInteger",
+              "decimals": 0
+            }
+          ]
+        },
+        {
+          "name": "newdomain",
+          "type": "ByteArray|Integer",
+          "escape": "BigInteger",
+          "decimals": 0
+        }
+      ],
+      "memo": "提取NNS 域名中心 合约changeOwnerInfo"
     }
   ]
 }

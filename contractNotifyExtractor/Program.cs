@@ -105,52 +105,39 @@ namespace contractNotifyExtractor
                             int i = 0;
                             foreach (JObject Jvalue in JAstate)
                             {
-                                JObject JtaskEscapeInfo = (JObject)JAtaskNotifyStructure[i];
-                                var JtaskEscapeInfo_escape = (string)JtaskEscapeInfo["escape"];
                                 string notifyType = Jvalue["type"].ToString();
-                                string notifyValue = Jvalue["value"].ToString();
-                                string taskName = JtaskEscapeInfo["name"].ToString();
+                                                               
 
-                                //如果处理失败则不处理（用原值）
-                                switch (JtaskEscapeInfo_escape) {
-                                    case "String"://处理成字符串
-                                        try
-                                        {
-                                            notifyValue = notifyValue.Hexstring2String();
-                                        }
-                                        catch { }
+                                if (notifyType == "Array")//数组类一层展开
+                                {
+                                    JArray JAarrayValue = (JArray)Jvalue["value"];
 
-                                        break;
-                                    case "Address"://处理成地址
-                                        try
-                                        {
-                                            notifyValue = ThinNeo.Helper.GetAddressFromScriptHash(notifyValue.HexString2Bytes());
-                                        }
-                                        catch { }
+                                    int j = 0;
+                                    foreach (JObject JvalueLevel2 in JAarrayValue) {
+                                        string notifyTypeLevel2 = JvalueLevel2["type"].ToString();
+                                        string notifyValueLevel2 = JvalueLevel2["value"].ToString();
+                                        JObject JtaskEscapeInfo = (JObject)((JObject)JAtaskNotifyStructure[i])["arrayData"][j];
 
-                                        break;
-                                    case "BigInteger"://处理成大整数
-                                        try
-                                        {
-                                            int decimals = int.Parse(JtaskEscapeInfo["decimals"].ToString());
-                                            if (notifyType == "ByteArray")
-                                            {
-                                                notifyValue = notifyValue.getNumStrFromHexStr(decimals);
-                                            }
-                                            else//Integer
-                                            {
-                                                notifyValue = notifyValue.getNumStrFromIntStr(decimals);
-                                            }
-                                        }
-                                        catch { }
-                                        
-                                        break;
-                                    default://未定义，则不处理（用原值）
-                                        break;
+                                        //如果处理失败则不处理（用原值）
+                                        notifyValueLevel2 = escapeHelper.contractDataEscap(notifyTypeLevel2, notifyValueLevel2, JtaskEscapeInfo);
+
+                                        string taskName = JtaskEscapeInfo["name"].ToString();
+                                        JnotifyInfo.Add(taskName, notifyValueLevel2);
+
+                                        j++;
+                                    }
                                 }
+                                else
+                                {
+                                    string notifyValue = Jvalue["value"].ToString();
+                                    JObject JtaskEscapeInfo = (JObject)JAtaskNotifyStructure[i];
 
-                                JnotifyInfo.Add(taskName, notifyValue);
+                                    //如果处理失败则不处理（用原值）
+                                    notifyValue = escapeHelper.contractDataEscap(notifyType, notifyValue, JtaskEscapeInfo);
 
+                                    string taskName = JtaskEscapeInfo["name"].ToString();
+                                    JnotifyInfo.Add(taskName, notifyValue);
+                                }                                                                                                  
                                 i++;
                             }
 

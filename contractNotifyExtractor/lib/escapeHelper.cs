@@ -1,11 +1,90 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Newtonsoft.Json.Linq;
 
 namespace contractNotifyExtractor.lib
 {
     public static class escapeHelper
     {
+        public static string contractDataEscap(string type, string value, JObject taskEscapeInfo)
+        {
+            string result = value;
+
+            string escap = (string)taskEscapeInfo["escape"];
+            switch (escap)
+            {
+                case "String"://处理成字符串
+                    if (isZeroEmpty(type, value))
+                    { result = "";}
+                    else
+                    {
+                        try
+                        {
+                            result = value.Hexstring2String();
+                        }
+                        catch { }
+                    }
+
+                    break;
+                case "Address"://处理成地址
+                    if (isZeroEmpty(type, value))
+                    { result = ""; }
+                    else
+                    {
+                        try
+                        {
+                            result = ThinNeo.Helper.GetAddressFromScriptHash(value.HexString2Bytes());
+                        }
+                        catch { }
+                    }
+
+                    break;
+                case "BigInteger"://处理成大整数
+                    int decimals = 0;
+                    if (taskEscapeInfo["decimals"] != null) decimals = int.Parse(taskEscapeInfo["decimals"].ToString());
+
+                    if (isZeroEmpty(type, value))
+                    {
+                        result = "0";
+                    }
+                    else
+                    {
+                        try
+                        {
+                            if (type == "ByteArray")
+                            {
+                                result = value.getNumStrFromHexStr(decimals);
+                            }
+                            else//Integer
+                            {
+                                result = value.getNumStrFromIntStr(decimals);
+                            }
+                        }
+                        catch { }
+                    }
+
+                    break;
+                default://未定义，则不处理（用原值）
+                    if (isZeroEmpty(type, value))
+                    {
+                        result = "";
+                    }
+                    break;
+            }
+
+            return result;
+        }
+
+        //为0.为空，为false再NEOvm处理中，有时通知输出类型会变成各种奇怪东西，此处统一判断
+        public static bool isZeroEmpty(string type, string value)
+        {
+            if (type == "Boolean" && value == "false") return true;
+            if (type == "ByteArray" && value == "") return true;
+
+            return false;
+        }
+
         public static string String2Hexstring(this string str)
         {
             byte[] byteArray = Encoding.UTF8.GetBytes(str);
