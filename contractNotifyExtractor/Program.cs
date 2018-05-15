@@ -217,9 +217,9 @@ namespace contractNotifyExtractor
 
                 Task task_extract = new Task(() => {
                     Console.WriteLine(task["memo"] + "_任务开始");
-                    Console.WriteLine("本任务读-数据库连接：" + readConnStr);
+                    //Console.WriteLine("本任务读-数据库连接：" + readConnStr);
                     Console.WriteLine("本任务读-数据库：" + readDBname);
-                    Console.WriteLine("本任务写-数据库连接：" + writeConnStr);
+                    //Console.WriteLine("本任务写-数据库连接：" + writeConnStr);
                     Console.WriteLine("本任务写-据库连：" + writeDBname);               
                     Console.WriteLine("本任务网络类型：" + taskNetType);
                     Console.WriteLine("任务ID：" + taskID);
