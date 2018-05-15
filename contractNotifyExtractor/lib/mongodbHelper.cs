@@ -4,13 +4,14 @@ using MongoDB.Driver;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace contractNotifyExtractor.lib
 {
     public class mongodbHelper
     {
-        public JArray GetData(string mongodbConnStr, string mongodbDatabase, string coll, string findFliter, string sortFliter,int limit = 0)
+        public JArray GetData(string mongodbConnStr, string mongodbDatabase, string coll, string findFliter, string sortFliter="{}",int limit = 0)
         {
             var client = new MongoClient(mongodbConnStr);
             var database = client.GetDatabase(mongodbDatabase);
@@ -98,6 +99,37 @@ namespace contractNotifyExtractor.lib
             else
             {
                 collection.ReplaceOne(queryBson, setBson);
+            }
+
+            //自动添加索引
+            setIndex(mongodbConnStr, mongodbDatabase, "contractStorageHeight", "{'contractHash':1}", "i_contractHash",true);
+
+            client = null;
+        }
+
+        public void setIndex(string mongodbConnStr, string mongodbDatabase, string coll, string indexDefinition, string indexName, bool isUnique = false)
+        {
+            var client = new MongoClient(mongodbConnStr);
+            var database = client.GetDatabase(mongodbDatabase);
+            var collection = database.GetCollection<BsonDocument>(coll);
+
+            //检查是否已有设置idnex
+            bool isSet = false;
+            using (var cursor = collection.Indexes.List())
+            {
+                JArray JAindexs = JArray.Parse(cursor.ToList().ToJson());
+                var query = JAindexs.Children().Where(index => (string)index["name"] == indexName);
+                if (query.Count() > 0) isSet = true;
+                // do something with the list...
+            }
+
+            if (!isSet)
+            {
+                try {
+                    var options = new CreateIndexOptions { Name= indexName, Unique = isUnique };
+                    collection.Indexes.CreateOne(indexDefinition, options);
+                }
+                catch { }
             }
 
             client = null;

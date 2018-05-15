@@ -155,12 +155,28 @@ namespace contractNotifyExtractor
                 try
                 {
                     var a = JAinsertData.ToString();
-                    //批量写入一个块的所有定义notify
-                    mh.InsertDataByJarray(writeConnStr, writeDBname, taskContractHash, JAinsertData);
-                    //更新处理高度
-                    mh.setContractStorageHeight(writeConnStr, writeDBname, taskContractHash, doBlockHeight);
+                    var queryStr = "{blockindex:" + JAinsertData[0]["blockindex"] + ",txid:'" + JAinsertData[0]["txid"] + "',n:" + JAinsertData[0]["n"] + "}";
+                    //没有入库才入库
+                    if (mh.GetData(writeConnStr, writeDBname, taskContractHash, queryStr).Count == 0)
+                    {
+                        //批量写入一个块的所有定义notify
+                        mh.InsertDataByJarray(writeConnStr, writeDBname, taskContractHash, JAinsertData);
+                        //自动添加必要索引(会自动判断索引是否存在，不存在才添加)
+                        //mh.setIndex(writeConnStr, writeDBname, taskContractHash, "{'blockindex':1}", "i_blockindex");
+                        mh.setIndex(writeConnStr, writeDBname, taskContractHash, "{'blockindex':1,'txid':1,'n':1}", "i_blockindex_txid_n", true);
+                        //更新处理高度
+                        mh.setContractStorageHeight(writeConnStr, writeDBname, taskContractHash, doBlockHeight);
+                    }
+                    else
+                    {
+                        Console.WriteLine("任务ID：" + taskID + "当前高度已入库，自动跳过当前高度" + doBlockHeight);
+                        //更新处理高度
+                        mh.setContractStorageHeight(writeConnStr, writeDBname, taskContractHash, doBlockHeight);
+                    }
                 }
-                catch { }
+                catch(Exception ex) {
+                    var e = ex.Message;
+                }
 
                 isNewDataExist = true;
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Newtonsoft.Json.Linq;
 
@@ -12,6 +13,7 @@ namespace contractNotifyExtractor.lib
             string result = value;
 
             string escap = (string)taskEscapeInfo["escape"];
+            int decimals = 0;
             switch (escap)
             {
                 case "String"://处理成字符串
@@ -40,8 +42,7 @@ namespace contractNotifyExtractor.lib
                     }
 
                     break;
-                case "BigInteger"://处理成大整数
-                    int decimals = 0;
+                case "BigInteger"://处理成大整数                  
                     if (taskEscapeInfo["decimals"] != null) decimals = int.Parse(taskEscapeInfo["decimals"].ToString());
 
                     if (isZeroEmpty(type, value))
@@ -65,11 +66,20 @@ namespace contractNotifyExtractor.lib
                     }
 
                     break;
-                default://未定义，则不处理（用原值）
+                default://未定义，默认是hexString，合约中是byte[]，尝试逆转操作
                     if (isZeroEmpty(type, value))
                     {
                         result = "";
                     }
+                    else
+                    {
+                        try
+                        {
+                            result = "0x" + value.hexstringReverse();
+                        }
+                        catch { }
+                    }
+
                     break;
             }
 
@@ -79,7 +89,7 @@ namespace contractNotifyExtractor.lib
         //为0.为空，为false再NEOvm处理中，有时通知输出类型会变成各种奇怪东西，此处统一判断
         public static bool isZeroEmpty(string type, string value)
         {
-            if (type == "Boolean" && value == "false") return true;
+            if (type == "Boolean" && value == "False") return true;
             if (type == "ByteArray" && value == "") return true;
 
             return false;
@@ -112,35 +122,9 @@ namespace contractNotifyExtractor.lib
             return str;
         }
 
-        public static string BytesToHexString(this byte[] data)
+        public static string hexstringReverse(this string hexstr)
         {
-            StringBuilder sb = new StringBuilder();
-            foreach (var b in data)
-            {
-                sb.Append(b.ToString("x02"));
-            }
-            return sb.ToString();
-        }
-
-        public static string FromHexString(this string hexString)
-        {
-            var bytes = new byte[hexString.Length / 2];
-            for (var i = 0; i < bytes.Length; i++)
-            {
-                bytes[i] = Convert.ToByte(hexString.Substring(i * 2, 2), 16);
-            }
-
-            return Encoding.Unicode.GetString(bytes); // returns: "Hello world" for "48656C6C6F20776F726C64"
-        }
-
-        public static string formatHexStr(this string hexStr)
-        {
-            string result = hexStr.ToLower();
-
-            if (result.IndexOf("0x") == -1)
-                result = "0x" + result;
-
-            return result;
+            return hexstr.HexString2Bytes().Reverse().ToArray().BytesToHexString();
         }
 
         public static byte[] HexString2Bytes(this string str)
@@ -153,5 +137,14 @@ namespace contractNotifyExtractor.lib
             return b;
         }
 
+        public static string BytesToHexString(this byte[] data)
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (var b in data)
+            {
+                sb.Append(b.ToString("x02"));
+            }
+            return sb.ToString();
+        }
     }
 }
