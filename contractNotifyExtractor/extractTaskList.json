@@ -62,6 +62,31 @@
       "memo": "提取NNS sGAS 合约transfer"
     },
     {
+      //提取NNS sGAS 合约onRefundTarget
+      "netType": "testnet",
+      "contractHash": "0x4ac464f84f50d3f902c2f0ca1658bfaa454ddfbf",
+      "notifyDisplayName": "onRefundTarget",
+      "notifyStructure": [
+        {
+          "name": "displayName", //显示名字
+          "type": "ByteArray", //原类型
+          "escape": "String", //转义为
+          "where": "onRefundTarget" //满足此条件入库
+        },
+        {
+          "name": "txid",
+          "type": "ByteArray",
+          "escape": ""
+        },
+        {
+          "name": "who",
+          "type": "ByteArray",
+          "escape": "Address"
+        }
+      ],
+      "memo": "提取NNS sGAS 合约onRefundTarget"
+    },
+    {
       //提取NNS 域名中心 合约changeOwnerInfo
       "netType": "testnet",
       "contractHash": "0x1ff70bb2147cf56c8b1ce0eb09323eb2b3f57916",
