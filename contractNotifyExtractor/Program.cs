@@ -36,7 +36,7 @@ namespace contractNotifyExtractor
             string taskContractHash = task["contractHash"].ToString();
             string taskNotifyDisplayName = task["notifyDisplayName"].ToString();
             JArray JAtaskNotifyStructure = (JArray)task["notifyStructure"];
-            Int64 lastBlockindex = mh.getContractStorageHeight(writeConnStr, writeDBname, taskContractHash);
+            Int64 lastBlockindex = mh.getContractStorageHeight(writeConnStr, writeDBname, taskContractHash, taskNotifyDisplayName);
 
             #region
             //JObject contractStorageHeightTXID = mh.getContractStorageHeight(writeConnStr, writeDBname,contractHash);
@@ -122,7 +122,14 @@ namespace contractNotifyExtractor
                                         notifyValueLevel2 = escapeHelper.contractDataEscap(notifyTypeLevel2, notifyValueLevel2, JtaskEscapeInfo);
 
                                         string taskName = JtaskEscapeInfo["name"].ToString();
-                                        JnotifyInfo.Add(taskName, notifyValueLevel2);
+
+                                        try {
+                                            JnotifyInfo.Add(taskName, notifyValueLevel2);
+                                        }
+                                        catch {//重名
+                                            JnotifyInfo.Add("_" + taskName, notifyValueLevel2);
+                                        }
+                                        
 
                                         j++;
                                     }
@@ -136,13 +143,24 @@ namespace contractNotifyExtractor
                                     notifyValue = escapeHelper.contractDataEscap(notifyType, notifyValue, JtaskEscapeInfo);
 
                                     string taskName = JtaskEscapeInfo["name"].ToString();
-                                    JnotifyInfo.Add(taskName, notifyValue);
+                                    try {
+                                        JnotifyInfo.Add(taskName, notifyValue);
+                                    }
+                                    catch {//重名
+                                        JnotifyInfo.Add("_" + taskName, notifyValue);
+                                    }
                                 }                                                                                                  
                                 i++;
                             }
 
                             //记录原数据
-                            JnotifyInfo.Add("state", Jnotify["state"]);
+                            try {
+                                JnotifyInfo.Add("state", Jnotify["state"]);
+                            }
+                            catch {//重名
+                                JnotifyInfo.Add("_" + "state", Jnotify["state"]);
+                            }
+                            
 
                             //加入需要写入的数据的组
                             JAinsertData.Add(JnotifyInfo);
@@ -154,25 +172,30 @@ namespace contractNotifyExtractor
 
                 try
                 {
-                    var a = JAinsertData.ToString();
-                    var queryStr = "{blockindex:" + JAinsertData[0]["blockindex"] + ",txid:'" + JAinsertData[0]["txid"] + "',n:" + JAinsertData[0]["n"] + "}";
                     //没有入库才入库
-                    if (mh.GetData(writeConnStr, writeDBname, taskContractHash, queryStr).Count == 0)
+                    if (JAinsertData.Count > 0)
                     {
-                        //批量写入一个块的所有定义notify
-                        mh.InsertDataByJarray(writeConnStr, writeDBname, taskContractHash, JAinsertData);
-                        //自动添加必要索引(会自动判断索引是否存在，不存在才添加)
-                        //mh.setIndex(writeConnStr, writeDBname, taskContractHash, "{'blockindex':1}", "i_blockindex");
-                        mh.setIndex(writeConnStr, writeDBname, taskContractHash, "{'blockindex':1,'txid':1,'n':1}", "i_blockindex_txid_n", true);
-                        //更新处理高度
-                        mh.setContractStorageHeight(writeConnStr, writeDBname, taskContractHash, doBlockHeight);
+                        var queryStr = "{blockindex:" + JAinsertData[0]["blockindex"] + ",txid:'" + JAinsertData[0]["txid"] + "',n:" + JAinsertData[0]["n"] + "}";
+                        if (mh.GetData(writeConnStr, writeDBname, taskContractHash, queryStr).Count == 0)
+                        {
+                            //批量写入一个块的所有定义notify
+                            mh.InsertDataByJarray(writeConnStr, writeDBname, taskContractHash, JAinsertData);
+                            //自动添加必要索引(会自动判断索引是否存在，不存在才添加)
+                            //mh.setIndex(writeConnStr, writeDBname, taskContractHash, "{'blockindex':1}", "i_blockindex");
+                            mh.setIndex(writeConnStr, writeDBname, taskContractHash, "{'blockindex':1,'txid':1,'n':1}", "i_blockindex_txid_n", true);
+                        }
+                        else
+                        {
+                            Console.WriteLine("任务ID：" + taskID + "当前高度已入库，自动跳过当前高度" + doBlockHeight);
+                        }
                     }
                     else
                     {
-                        Console.WriteLine("任务ID：" + taskID + "当前高度已入库，自动跳过当前高度" + doBlockHeight);
-                        //更新处理高度
-                        mh.setContractStorageHeight(writeConnStr, writeDBname, taskContractHash, doBlockHeight);
+                        Console.WriteLine("任务ID：" + taskID + "当前高度，没有匹配的通知显示名称" + taskNotifyDisplayName + "，自动跳过当前高度");
                     }
+
+                    //更新处理高度
+                    mh.setContractStorageHeight(writeConnStr, writeDBname, taskContractHash, taskNotifyDisplayName, doBlockHeight);
                 }
                 catch(Exception ex) {
                     var e = ex.Message;

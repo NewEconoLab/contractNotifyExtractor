@@ -62,13 +62,13 @@ namespace contractNotifyExtractor.lib
             client = null;
         }
 
-        public Int64 getContractStorageHeight(string mongodbConnStr, string mongodbDatabase, string contractHash)
+        public Int64 getContractStorageHeight(string mongodbConnStr, string mongodbDatabase, string contractHash, string displayName)
         {
             var client = new MongoClient(mongodbConnStr);
             var database = client.GetDatabase(mongodbDatabase);
             var collection = database.GetCollection<BsonDocument>("contractStorageHeight");
 
-            var queryBson = BsonDocument.Parse("{contractHash:'" + contractHash + "'}");
+            var queryBson = BsonDocument.Parse("{contractHash:'" + contractHash + "',displayName:'" + displayName + "'}");
             var query = collection.Find(queryBson).ToList();
             client = null;
 
@@ -82,15 +82,15 @@ namespace contractNotifyExtractor.lib
             }
         }
 
-        public void setContractStorageHeight(string mongodbConnStr, string mongodbDatabase, string contractHash, Int64 lastBlockindex)
+        public void setContractStorageHeight(string mongodbConnStr, string mongodbDatabase, string contractHash,string displayName, Int64 lastBlockindex)
         {
             var client = new MongoClient(mongodbConnStr);
             var database = client.GetDatabase(mongodbDatabase);
             var collection = database.GetCollection<BsonDocument>("contractStorageHeight");
 
-            var setBson = BsonDocument.Parse("{contractHash:'" + contractHash + "',lastBlockindex:" + lastBlockindex + "}");
+            var setBson = BsonDocument.Parse("{contractHash:'" + contractHash + "',displayName:'" + displayName + "',lastBlockindex:" + lastBlockindex + "}");
 
-            var queryBson = BsonDocument.Parse("{contractHash:'" + contractHash + "'}");
+            var queryBson = BsonDocument.Parse("{contractHash:'" + contractHash + "',displayName:'" + displayName + "'}");
             var query = collection.Find(queryBson).ToList();
             if (query.Count == 0)
             {
@@ -102,7 +102,7 @@ namespace contractNotifyExtractor.lib
             }
 
             //自动添加索引
-            setIndex(mongodbConnStr, mongodbDatabase, "contractStorageHeight", "{'contractHash':1}", "i_contractHash",true);
+            setIndex(mongodbConnStr, mongodbDatabase, "contractStorageHeight", "{'contractHash':1,'displayName':1}", "i_contractHash_displayName", true);
 
             client = null;
         }
