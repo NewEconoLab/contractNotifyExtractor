@@ -160,7 +160,16 @@ namespace contractNotifyExtractor
                             catch {//重名
                                 JnotifyInfo.Add("_" + "state", Jnotify["state"]);
                             }
-                            
+
+                            //记录时间
+                            try
+                            {
+                                JnotifyInfo.Add("getTime", DateTime.Now);
+                            }
+                            catch
+                            {//重名
+                                JnotifyInfo.Add("_" + "getTime", DateTime.Now);
+                            }
 
                             //加入需要写入的数据的组
                             JAinsertData.Add(JnotifyInfo);
