@@ -160,6 +160,161 @@
         }
       ],
       "memo": "提取NNS 域名中心 合约changeOwnerInfo"
+    },
+    {
+      //提取NNS sell拍卖型注册器 合约 domainstate
+      "netType": "testnet",
+      "contractHash": "0x505d66281afad9b78b73b84584e3d345463866f4",
+      "notifyDisplayName": "domainstate",
+      "notifyStructure": [
+        {
+          "name": "displayName", //显示名字
+          "type": "ByteArray", //原类型
+          "escape": "String", //转义为
+          "where": "domainstate" //满足此条件入库
+        },
+        {
+          "name": "array",
+          "type": "Array",
+          "escape": "ArrayExpansion",
+          "arrayData": [
+            {
+              "name": "id",
+              "type": "ByteArray",
+              "escape": ""
+            },
+            {
+              "name": "parenthash",
+              "type": "ByteArray",
+              "escape": ""
+            },
+            {
+              "name": "domain",
+              "type": "ByteArray",
+              "escape": "String"
+            },
+            {
+              "name": "domainTTL",
+              "type": "ByteArray|Integer",
+              "escape": "BigInteger",
+              "decimals": 0
+            },
+            {
+              "name": "startBlockSelling",
+              "type": "ByteArray|Integer",
+              "escape": "BigInteger",
+              "decimals": 0
+            },
+            {
+              "name": "endBlock",
+              "type": "ByteArray|Integer",
+              "escape": "BigInteger",
+              "decimals": 0
+            },
+            {
+              "name": "maxPrice",
+              "type": "ByteArray|Integer",
+              "escape": "BigInteger",
+              "decimals": 8
+            },
+            {
+              "name": "maxBuyer",
+              "type": "ByteArray",
+              "escape": "Address"
+            },
+            {
+              "name": "lastBlock",
+              "type": "ByteArray|Integer",
+              "escape": "BigInteger",
+              "decimals": 0
+            }
+          ]
+        }
+      ],
+      "memo": "提取NNS sell拍卖型注册器 合约 domainstate"
+    },
+    {
+      //提取NNS sell拍卖型注册器 合约 addprice
+      "netType": "testnet",
+      "contractHash": "0x505d66281afad9b78b73b84584e3d345463866f4",
+      "notifyDisplayName": "addprice",
+      "notifyStructure": [
+        {
+          "name": "displayName", //显示名字
+          "type": "ByteArray", //原类型
+          "escape": "String", //转义为
+          "where": "addprice" //满足此条件入库
+        },
+        {
+          "name": "who",
+          "type": "ByteArray",
+          "escape": "Address"
+        },
+        {
+          "name": "array",
+          "type": "Array",
+          "escape": "ArrayExpansion",
+          "arrayData": [
+            {
+              "name": "id",
+              "type": "ByteArray",
+              "escape": ""
+            },
+            {
+              "name": "parenthash",
+              "type": "ByteArray",
+              "escape": ""
+            },
+            {
+              "name": "domain",
+              "type": "ByteArray",
+              "escape": "String"
+            },
+            {
+              "name": "domainTTL",
+              "type": "ByteArray|Integer",
+              "escape": "BigInteger",
+              "decimals": 0
+            },
+            {
+              "name": "startBlockSelling",
+              "type": "ByteArray|Integer",
+              "escape": "BigInteger",
+              "decimals": 0
+            },
+            {
+              "name": "endBlock",
+              "type": "ByteArray|Integer",
+              "escape": "BigInteger",
+              "decimals": 0
+            },
+            {
+              "name": "maxPrice",
+              "type": "ByteArray|Integer",
+              "escape": "BigInteger",
+              "decimals": 8
+            },
+            {
+              "name": "maxBuyer",
+              "type": "ByteArray",
+              "escape": "Address"
+            },
+            {
+              "name": "lastBlock",
+              "type": "ByteArray|Integer",
+              "escape": "BigInteger",
+              "decimals": 0
+            }
+          ]
+        },
+        {
+          "name": "value",
+          "type": "ByteArray|Integer",
+          "escape": "BigInteger",
+          "decimals": 8
+        }
+      ],
+      "memo": "提取NNS sell拍卖型注册器 合约 addprice"
     }
   ]
 }
