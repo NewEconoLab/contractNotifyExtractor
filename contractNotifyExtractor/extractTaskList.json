@@ -1,6 +1,14 @@
 ﻿{
   "taskList": [
     {
+      //测试网CliNotify入库任务
+      "netType": "testnet",
+      "neoCliJsonRPCUrl": "http://47.98.32.45:20332",
+      "notifyCollName": "cliNotifyData",
+      "isOnlyNotify2DB": true,//是否只入库notify，不处理其他分析型任务
+      "memo": "测试网CliNotify入库任务"
+    },
+    {
       //提取NNS标准解析器通知信息
       "netType": "testnet",
       "contractHash": "0xabb0f1f3f035dd7ad80ca805fce58d62c517cc6b",

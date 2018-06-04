@@ -232,6 +232,7 @@ namespace contractNotifyExtractor
             JObject taskListConfig = getConfig("extractTaskList.json");
 
             int i = 1;//任务号
+            bool isOnlyNotify2DB = false;//是否只入库notify，不处理其他分析型任务
             foreach (JObject task in (JArray)taskListConfig["taskList"])
             {
                 string taskID = i.ToString("000000");
@@ -246,6 +247,18 @@ namespace contractNotifyExtractor
                 string readDBname = queryReadDBinfo.First()["readDatabase"].ToString();
                 string writeConnStr = queryReadDBinfo.First()["writeConnStr"].ToString();
                 string writeDBname = queryReadDBinfo.First()["writeDatebase"].ToString();
+
+                //判断是否CliNotify入库任务
+                if (task["neoCliJsonRPCUrl"] != null)
+                {
+                    string neoCliJsonRPCUrl = task["neoCliJsonRPCUrl"].ToString();
+                    string notifyCollName = task["notifyCollName"].ToString();
+                    isOnlyNotify2DB = (bool)task["isOnlyNotify2DB"];
+                    notify2DBhelper notify2DBhelper = new notify2DBhelper(neoCliJsonRPCUrl, writeConnStr, writeDBname);
+                    var a = notify2DBhelper.getCliLogData("0x2cb3aea28300736b3adc15e590102a0c1c0807051f2222df44a14640f9f58c92");
+                    var b = notify2DBhelper.getZero20();
+                    var c = notify2DBhelper.checkNewNotify(notifyCollName);
+                }
 
                 Task task_extract = new Task(() => {
                     Console.WriteLine(task["memo"] + "_任务开始");
