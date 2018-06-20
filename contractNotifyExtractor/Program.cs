@@ -256,10 +256,11 @@ namespace contractNotifyExtractor
                     string notifyCollName = task["notifyCollName"].ToString();
                     isOnlyNotify2DB = (bool)task["isOnlyNotify2DB"];
                     notify2DBhelper notify2DBhelper = new notify2DBhelper(neoCliJsonRPCUrl, writeConnStr, writeDBname);
-                    var a = notify2DBhelper.getCliLogData("0x2cb3aea28300736b3adc15e590102a0c1c0807051f2222df44a14640f9f58c92");
+                    //var a = notify2DBhelper.getCliLogData("0x2cb3aea28300736b3adc15e590102a0c1c0807051f2222df44a14640f9f58c92");
                     //var b = notify2DBhelper.getZero20();
                     //var c = notify2DBhelper.checkNewNotify(notifyCollName);
-                    //var d = notify2DBhelper.getCliBlockData(100);
+                    //var d = notify2DBhelper.getCliBlockData(0);
+                    string taskIDStr = taskID.ToString("000000");
 
                     Task task_storgeNotify = new Task(() =>
                     {
@@ -269,7 +270,7 @@ namespace contractNotifyExtractor
                         Console.WriteLine("本任务写-表：" + notifyCollName);
                         Console.WriteLine("是否只入库notify元数据模式：" + isOnlyNotify2DB.ToString());
                         Console.WriteLine("本任务网络类型：" + taskNetType);
-                        Console.WriteLine("任务ID：" + taskID.ToString("000000"));
+                        Console.WriteLine("任务ID：" + taskIDStr);
                         while (true)
                         {
                             if (notify2DBhelper.checkNewNotify(notifyCollName))
@@ -291,6 +292,7 @@ namespace contractNotifyExtractor
                 }
 
                 if (!isOnlyNotify2DB) {
+                    string taskIDStr = taskID.ToString("000000");
                     Task task_extract = new Task(() => {
                         Console.WriteLine(task["memo"] + "_任务开始");
                         //Console.WriteLine("本任务读-数据库连接：" + readConnStr);
@@ -298,11 +300,11 @@ namespace contractNotifyExtractor
                         //Console.WriteLine("本任务写-数据库连接：" + writeConnStr);
                         Console.WriteLine("本任务写-据库连：" + writeDBname);
                         Console.WriteLine("本任务网络类型：" + taskNetType);
-                        Console.WriteLine("任务ID：" + taskID.ToString("000000"));
+                        Console.WriteLine("任务ID：" + taskIDStr);
                         while (true)
                         {
                             //Console.WriteLine(taskID);
-                            bool isNewDataExist = extractNotifyInfo(taskID.ToString("000000"), task, readConnStr, readDBname, writeConnStr, writeDBname);
+                            bool isNewDataExist = extractNotifyInfo(taskIDStr, task, readConnStr, readDBname, writeConnStr, writeDBname);
                             //本次操作，是否处理了新数据。处理新数据就积极入库，没有新数据就消极入库
                             if (isNewDataExist)
                             {
@@ -315,9 +317,9 @@ namespace contractNotifyExtractor
                         }
                     });
                     task_extract.Start();
-                }             
 
-                taskID++;
+                    taskID++;
+                }                     
             }
 
             Console.ReadKey();

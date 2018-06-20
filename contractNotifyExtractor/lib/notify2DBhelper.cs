@@ -63,20 +63,30 @@ namespace contractNotifyExtractor.lib
             JArray notifyJA = new JArray();
 
             Int64 dbNotifyBlockHeight = mh.getContractStorageHeight(mongodbConnStr, mongodbDatabase, getZero20(), notifyCollName);
-            JObject blockDataJ = JObject.Parse(getCliBlockData(dbNotifyBlockHeight++));
+            dbNotifyBlockHeight++;
+            JObject blockDataJ = JObject.Parse(getCliBlockData(dbNotifyBlockHeight));
             foreach (JObject tx in (JArray)blockDataJ["tx"])
             {
                 string txid = tx["txid"].ToString();
-                JObject notifyJ = JObject.Parse(getCliLogData(txid));
-                notifyJ.Add("blockindex", dbNotifyBlockHeight);
-                notifyJA.Add(notifyJ);
+                string notifyStr = getCliLogData(txid);
+                if (notifyStr != string.Empty)
+                {
+                    JObject notifyJ = JObject.Parse(getCliLogData(txid));
+                    notifyJ.Add("blockindex", dbNotifyBlockHeight);
+                    notifyJA.Add(notifyJ);
+                }
             }
-            //批量插入一个块的所有数据
-            mh.InsertDataByJarray(mongodbConnStr, mongodbDatabase, notifyCollName, notifyJA);
-            //设置索引
-            mh.setIndex(mongodbConnStr, mongodbDatabase, notifyCollName, "{'blockindex’:1,'txid':1}", "i_blockindex_txid", true);
+            if (notifyJA.Count > 0)
+            {
+                //批量插入一个块的所有数据
+                mh.InsertDataByJarray(mongodbConnStr, mongodbDatabase, notifyCollName, notifyJA);
+                //设置索引
+                mh.setIndex(mongodbConnStr, mongodbDatabase, notifyCollName, "{'blockindex’:1,'txid':1}", "i_blockindex_txid", true);
+            }
             //更新处理高度
             mh.setContractStorageHeight(mongodbConnStr, mongodbDatabase, getZero20(), notifyCollName, dbNotifyBlockHeight);
+
+            Console.WriteLine("已处理" + dbNotifyBlockHeight + "高度Notify入库");
         }
     }
 }
