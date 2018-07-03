@@ -11,7 +11,7 @@
     {
       //提取NNS标准解析器通知信息
       "netType": "testnet",
-      "contractHash": "0xabb0f1f3f035dd7ad80ca805fce58d62c517cc6b",
+      "contractHash": "0xcf0d21eaa1803f63704ddb06c373c22d815b7ca2",
       "notifyDisplayName": "setResolveData",
       "notifyStructure": [
         {
@@ -41,7 +41,7 @@
     {
       //提取NNS sGAS 合约transfer
       "netType": "testnet",
-      "contractHash": "0x4ac464f84f50d3f902c2f0ca1658bfaa454ddfbf",
+      "contractHash": "0x3f7420285874867c30f32e44f304fd62ad1e9573",
       "notifyDisplayName": "transfer",
       "notifyStructure": [
         {
@@ -72,7 +72,7 @@
     {
       //提取NNS sGAS 合约onRefundTarget
       "netType": "testnet",
-      "contractHash": "0x4ac464f84f50d3f902c2f0ca1658bfaa454ddfbf",
+      "contractHash": "0x3f7420285874867c30f32e44f304fd62ad1e9573",
       "notifyDisplayName": "onRefundTarget",
       "notifyStructure": [
         {
@@ -97,7 +97,7 @@
     {
       //提取NNS 域名中心 合约changeOwnerInfo
       "netType": "testnet",
-      "contractHash": "0x1ff70bb2147cf56c8b1ce0eb09323eb2b3f57916",
+     "contractHash": "0x99000f983390d88b6367548e0773e0a701f3af97",
       "notifyDisplayName": "changeOwnerInfo",
       "notifyStructure": [
         {
@@ -172,7 +172,7 @@
     {
       //提取NNS sell拍卖型注册器 合约 domainstate
       "netType": "testnet",
-      "contractHash": "0x505d66281afad9b78b73b84584e3d345463866f4",
+      "contractHash": "0xe6ca46ae962a62af81e1102af8ff690421ef3d7f",
       "notifyDisplayName": "domainstate",
       "notifyStructure": [
         {
@@ -244,7 +244,7 @@
     {
       //提取NNS sell拍卖型注册器 合约 addprice
       "netType": "testnet",
-      "contractHash": "0x505d66281afad9b78b73b84584e3d345463866f4",
+      "contractHash": "0xe6ca46ae962a62af81e1102af8ff690421ef3d7f",
       "notifyDisplayName": "addprice",
       "notifyStructure": [
         {
