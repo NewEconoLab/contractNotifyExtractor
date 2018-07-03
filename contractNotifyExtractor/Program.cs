@@ -82,99 +82,108 @@ namespace contractNotifyExtractor
                     int n = 0;//标记notify在一个tx里的序号
                     foreach (JObject Jnotify in JAnotifications)
                     {
-                        JArray JAstate = (JArray)Jnotify["state"]["value"];
-
-                        string dataContractHash = Jnotify["contract"].ToString();
-                        string dataNotifyDisplayName = JAstate[0]["value"].ToString().Hexstring2String();
-                        if (dataContractHash == taskContractHash && dataNotifyDisplayName == taskNotifyDisplayName)
+                        if (Jnotify["state"]["type"].ToString() == "Array")
                         {
-                            //Jnotify.Add("blockindex", blockindex);
-                            //Jnotify.Add("txid", txid);
-                            //Jnotify.Add("n", n);
-                            
+                            JArray JAstate = (JArray)Jnotify["state"]["value"];
 
-                            //存储解析后数据
-                            JObject JnotifyInfo = new JObject();
-                            //下列三项组合为唯一索引
-                            JnotifyInfo.Add("blockindex", blockindex);
-                            JnotifyInfo.Add("txid", txid);
-                            JnotifyInfo.Add("n", n);
-                            //解析数据
-                            //JnotifyInfo.Add("infoDisplayName", dataNotifyDisplayName);
-
-                            int i = 0;
-                            foreach (JObject Jvalue in JAstate)
+                            string dataContractHash = Jnotify["contract"].ToString();
+                            string dataNotifyDisplayName = JAstate[0]["value"].ToString().Hexstring2String();
+                            if (dataContractHash == taskContractHash && dataNotifyDisplayName == taskNotifyDisplayName)
                             {
-                                string notifyType = Jvalue["type"].ToString();
-                                                               
+                                //Jnotify.Add("blockindex", blockindex);
+                                //Jnotify.Add("txid", txid);
+                                //Jnotify.Add("n", n);
 
-                                if (notifyType == "Array")//数组类一层展开
+
+                                //存储解析后数据
+                                JObject JnotifyInfo = new JObject();
+                                //下列三项组合为唯一索引
+                                JnotifyInfo.Add("blockindex", blockindex);
+                                JnotifyInfo.Add("txid", txid);
+                                JnotifyInfo.Add("n", n);
+                                //解析数据
+                                //JnotifyInfo.Add("infoDisplayName", dataNotifyDisplayName);
+
+                                int i = 0;
+                                foreach (JObject Jvalue in JAstate)
                                 {
-                                    JArray JAarrayValue = (JArray)Jvalue["value"];
+                                    string notifyType = Jvalue["type"].ToString();
 
-                                    int j = 0;
-                                    foreach (JObject JvalueLevel2 in JAarrayValue) {
-                                        string notifyTypeLevel2 = JvalueLevel2["type"].ToString();
-                                        string notifyValueLevel2 = JvalueLevel2["value"].ToString();
-                                        JObject JtaskEscapeInfo = (JObject)((JObject)JAtaskNotifyStructure[i])["arrayData"][j];
+
+                                    if (notifyType == "Array")//数组类一层展开
+                                    {
+                                        JArray JAarrayValue = (JArray)Jvalue["value"];
+
+                                        int j = 0;
+                                        foreach (JObject JvalueLevel2 in JAarrayValue)
+                                        {
+                                            string notifyTypeLevel2 = JvalueLevel2["type"].ToString();
+                                            string notifyValueLevel2 = JvalueLevel2["value"].ToString();
+                                            JObject JtaskEscapeInfo = (JObject)((JObject)JAtaskNotifyStructure[i])["arrayData"][j];
+
+                                            //如果处理失败则不处理（用原值）
+                                            notifyValueLevel2 = escapeHelper.contractDataEscap(notifyTypeLevel2, notifyValueLevel2, JtaskEscapeInfo);
+
+                                            string taskName = JtaskEscapeInfo["name"].ToString();
+
+                                            try
+                                            {
+                                                JnotifyInfo.Add(taskName, notifyValueLevel2);
+                                            }
+                                            catch
+                                            {//重名
+                                                JnotifyInfo.Add("_" + taskName, notifyValueLevel2);
+                                            }
+
+
+                                            j++;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        string notifyValue = Jvalue["value"].ToString();
+                                        JObject JtaskEscapeInfo = (JObject)JAtaskNotifyStructure[i];
 
                                         //如果处理失败则不处理（用原值）
-                                        notifyValueLevel2 = escapeHelper.contractDataEscap(notifyTypeLevel2, notifyValueLevel2, JtaskEscapeInfo);
+                                        notifyValue = escapeHelper.contractDataEscap(notifyType, notifyValue, JtaskEscapeInfo);
 
                                         string taskName = JtaskEscapeInfo["name"].ToString();
-
-                                        try {
-                                            JnotifyInfo.Add(taskName, notifyValueLevel2);
+                                        try
+                                        {
+                                            JnotifyInfo.Add(taskName, notifyValue);
                                         }
-                                        catch {//重名
-                                            JnotifyInfo.Add("_" + taskName, notifyValueLevel2);
+                                        catch
+                                        {//重名
+                                            JnotifyInfo.Add("_" + taskName, notifyValue);
                                         }
-                                        
-
-                                        j++;
                                     }
+                                    i++;
                                 }
-                                else
+
+                                //记录原数据
+                                try
                                 {
-                                    string notifyValue = Jvalue["value"].ToString();
-                                    JObject JtaskEscapeInfo = (JObject)JAtaskNotifyStructure[i];
+                                    JnotifyInfo.Add("state", Jnotify["state"]);
+                                }
+                                catch
+                                {//重名
+                                    JnotifyInfo.Add("_" + "state", Jnotify["state"]);
+                                }
 
-                                    //如果处理失败则不处理（用原值）
-                                    notifyValue = escapeHelper.contractDataEscap(notifyType, notifyValue, JtaskEscapeInfo);
+                                //记录时间
+                                try
+                                {
+                                    JnotifyInfo.Add("getTime", DateTime.Now);
+                                }
+                                catch
+                                {//重名
+                                    JnotifyInfo.Add("_" + "getTime", DateTime.Now);
+                                }
 
-                                    string taskName = JtaskEscapeInfo["name"].ToString();
-                                    try {
-                                        JnotifyInfo.Add(taskName, notifyValue);
-                                    }
-                                    catch {//重名
-                                        JnotifyInfo.Add("_" + taskName, notifyValue);
-                                    }
-                                }                                                                                                  
-                                i++;
-                            }
-
-                            //记录原数据
-                            try {
-                                JnotifyInfo.Add("state", Jnotify["state"]);
-                            }
-                            catch {//重名
-                                JnotifyInfo.Add("_" + "state", Jnotify["state"]);
-                            }
-
-                            //记录时间
-                            try
-                            {
-                                JnotifyInfo.Add("getTime", DateTime.Now);
-                            }
-                            catch
-                            {//重名
-                                JnotifyInfo.Add("_" + "getTime", DateTime.Now);
-                            }
-
-                            //加入需要写入的数据的组
-                            JAinsertData.Add(JnotifyInfo);
+                                //加入需要写入的数据的组
+                                JAinsertData.Add(JnotifyInfo);
+                            }                           
                         }
-
                         n++;
                     }
                 }
