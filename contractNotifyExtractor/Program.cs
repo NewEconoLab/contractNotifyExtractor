@@ -232,13 +232,18 @@ namespace contractNotifyExtractor
 
         static void Main(string[] args)
         {
-            //积极入库时间间隔
-            int sleepTime_positive = 100;
-            //消极入库时间间隔
-            int sleepTime_passive = 1000;
+            ////积极入库时间间隔
+            //int sleepTime_positive = 1 * 1000;
+            ////消极入库时间间隔
+            //int sleepTime_passive = 15 * 1000;
 
             JObject appConfig = getConfig("appsettings.json");
             JObject taskListConfig = getConfig("extractTaskList.json");
+
+            //积极入库时间间隔
+            int sleepTime_positive = (int)appConfig["sleepTime_positive"];
+            //消极入库时间间隔
+            int sleepTime_passive = (int)appConfig["sleepTime_passive"];
 
             int taskID = 1;//任务号
             bool isOnlyNotify2DB = false;//是否只入库notify，不处理其他分析型任务

@@ -172,7 +172,7 @@
     {
       //提取NNS sell拍卖型注册器 合约 domainstate
       "netType": "testnet",
-      "contractHash": "0xe6ca46ae962a62af81e1102af8ff690421ef3d7f",
+      "contractHash": "0x0d7233d795842c3b517a986b645ff419e6a6397c",
       "notifyDisplayName": "domainstate",
       "notifyStructure": [
         {
@@ -244,7 +244,7 @@
     {
       //提取NNS sell拍卖型注册器 合约 addprice
       "netType": "testnet",
-      "contractHash": "0xe6ca46ae962a62af81e1102af8ff690421ef3d7f",
+      "contractHash": "0x0d7233d795842c3b517a986b645ff419e6a6397c",
       "notifyDisplayName": "addprice",
       "notifyStructure": [
         {
@@ -323,6 +323,312 @@
         }
       ],
       "memo": "提取NNS sell拍卖型注册器 合约 addprice"
+    }, 
+    {
+      "netType": "testnet",
+      "contractHash": "0xf72808435fd52e55351c3a6c2c39fd9c3b1615a4",
+      "notifyDisplayName": "domainstate",
+      "notifyStructure": [
+        {
+          "name": "displayName", //????¡è???-¡ª
+          "type": "ByteArray", //????¡À???
+          "escape": "String", //¨¨???1¡ëo
+          "where": "domainstate" //???¨¨?3?-¡è?????¡­£¤?o¡°
+        },
+        {
+          "name": "array",
+          "type": "Array",
+          "escape": "ArrayExpansion",
+          "arrayData": [
+            {
+              "name": "id",
+              "type": "ByteArray",
+              "escape": ""
+            },
+            {
+              "name": "parenthash",
+              "type": "ByteArray",
+              "escape": ""
+            },
+            {
+              "name": "domain",
+              "type": "ByteArray",
+              "escape": "String"
+            },
+            {
+              "name": "domainTTL",
+              "type": "ByteArray|Integer",
+              "escape": "BigInteger",
+              "decimals": 0
+            },
+            {
+              "name": "startBlockSelling",
+              "type": "ByteArray|Integer",
+              "escape": "BigInteger",
+              "decimals": 0
+            },
+            {
+              "name": "endBlock",
+              "type": "ByteArray|Integer",
+              "escape": "BigInteger",
+              "decimals": 0
+            },
+            {
+              "name": "maxPrice",
+              "type": "ByteArray|Integer",
+              "escape": "BigInteger",
+              "decimals": 8
+            },
+            {
+              "name": "maxBuyer",
+              "type": "ByteArray",
+              "escape": "Address"
+            },
+            {
+              "name": "lastBlock",
+              "type": "ByteArray|Integer",
+              "escape": "BigInteger",
+              "decimals": 0
+            }
+          ]
+        }
+      ],
+      "memo": "?????¨CNNS sell?????¨C????3¡§?????¡§ ????o| domainstate"
+    },
+    {
+      "netType": "testnet",
+      "contractHash": "0xf72808435fd52e55351c3a6c2c39fd9c3b1615a4",
+      "notifyDisplayName": "addprice",
+      "notifyStructure": [
+        {
+          "name": "displayName", //???????¡§???-???a
+          "type": "ByteArray", //??????????
+          "escape": "String", //?¡§?¡§???1????o
+          "where": "addprice" //????¡§?¡§?3?-???¡§????????-?¡êè???¡ã      
+	},
+        {
+          "name": "who",
+          "type": "ByteArray",
+          "escape": "Address"
+        },
+        {
+          "name": "array",
+          "type": "Array",
+          "escape": "ArrayExpansion",
+          "arrayData": [
+            {
+              "name": "id",
+              "type": "ByteArray",
+              "escape": ""
+            },
+            {
+              "name": "parenthash",
+              "type": "ByteArray",
+              "escape": ""
+            },
+            {
+              "name": "domain",
+              "type": "ByteArray",
+              "escape": "String"
+            },
+            {
+              "name": "domainTTL",
+              "type": "ByteArray|Integer",
+              "escape": "BigInteger",
+              "decimals": 0
+            },
+            {
+              "name": "startBlockSelling",
+              "type": "ByteArray|Integer",
+              "escape": "BigInteger",
+              "decimals": 0
+            },
+            {
+              "name": "endBlock",
+              "type": "ByteArray|Integer",
+              "escape": "BigInteger",
+              "decimals": 0
+            },
+            {
+              "name": "maxPrice",
+              "type": "ByteArray|Integer",
+              "escape": "BigInteger",
+              "decimals": 8
+            },
+            {
+              "name": "maxBuyer",
+              "type": "ByteArray",
+              "escape": "Address"
+            },
+            {
+              "name": "lastBlock",
+              "type": "ByteArray|Integer",
+              "escape": "BigInteger",
+              "decimals": 0
+            }
+          ]
+        },
+        {
+          "name": "value",
+          "type": "ByteArray|Integer",
+          "escape": "BigInteger",
+          "decimals": 8
+        }
+      ],
+      "memo": "??????¡§CNNS sell??????¡§C????3???¡ì??????¡ì???o| addprice"
+    },
+    {
+      "netType": "testnet",
+      "contractHash": "0x667cd7f550e9462b95546dbeb13dceaf8a65c35d",
+      "notifyDisplayName": "domainstate",
+      "notifyStructure": [
+        {
+          "name": "displayName", //????¡è???-¡ª
+          "type": "ByteArray", //????¡À???
+          "escape": "String", //¨¨???1¡ëo
+          "where": "domainstate" //???¨¨?3?-¡è?????¡­£¤?o¡°
+        },
+        {
+          "name": "array",
+          "type": "Array",
+          "escape": "ArrayExpansion",
+          "arrayData": [
+            {
+              "name": "id",
+              "type": "ByteArray",
+              "escape": ""
+            },
+            {
+              "name": "parenthash",
+              "type": "ByteArray",
+              "escape": ""
+            },
+            {
+              "name": "domain",
+              "type": "ByteArray",
+              "escape": "String"
+            },
+            {
+              "name": "domainTTL",
+              "type": "ByteArray|Integer",
+              "escape": "BigInteger",
+              "decimals": 0
+            },
+            {
+              "name": "startBlockSelling",
+              "type": "ByteArray|Integer",
+              "escape": "BigInteger",
+              "decimals": 0
+            },
+            {
+              "name": "endBlock",
+              "type": "ByteArray|Integer",
+              "escape": "BigInteger",
+              "decimals": 0
+            },
+            {
+              "name": "maxPrice",
+              "type": "ByteArray|Integer",
+              "escape": "BigInteger",
+              "decimals": 8
+            },
+            {
+              "name": "maxBuyer",
+              "type": "ByteArray",
+              "escape": "Address"
+            },
+            {
+              "name": "lastBlock",
+              "type": "ByteArray|Integer",
+              "escape": "BigInteger",
+              "decimals": 0
+            }
+          ]
+        }
+      ],
+      "memo": "?????¨CNNS sell?????¨C????3¡§?????¡§ ????o| domainstate"
+    },
+    {
+      "netType": "testnet",
+      "contractHash": "0x667cd7f550e9462b95546dbeb13dceaf8a65c35d",
+      "notifyDisplayName": "addprice",
+      "notifyStructure": [
+        {
+          "name": "displayName", //????¡è???-¡ª
+          "type": "ByteArray", //????¡À???
+          "escape": "String", //¨¨???1¡ëo
+          "where": "addprice" //???¨¨?3?-¡è?????¡­£¤?o¡°
+        },
+        {
+          "name": "who",
+          "type": "ByteArray",
+          "escape": "Address"
+        },
+        {
+          "name": "array",
+          "type": "Array",
+          "escape": "ArrayExpansion",
+          "arrayData": [
+            {
+              "name": "id",
+              "type": "ByteArray",
+              "escape": ""
+            },
+            {
+              "name": "parenthash",
+              "type": "ByteArray",
+              "escape": ""
+            },
+            {
+              "name": "domain",
+              "type": "ByteArray",
+              "escape": "String"
+            },
+            {
+              "name": "domainTTL",
+              "type": "ByteArray|Integer",
+              "escape": "BigInteger",
+              "decimals": 0
+            },
+            {
+              "name": "startBlockSelling",
+              "type": "ByteArray|Integer",
+              "escape": "BigInteger",
+              "decimals": 0
+            },
+            {
+              "name": "endBlock",
+              "type": "ByteArray|Integer",
+              "escape": "BigInteger",
+              "decimals": 0
+            },
+            {
+              "name": "maxPrice",
+              "type": "ByteArray|Integer",
+              "escape": "BigInteger",
+              "decimals": 8
+            },
+            {
+              "name": "maxBuyer",
+              "type": "ByteArray",
+              "escape": "Address"
+            },
+            {
+              "name": "lastBlock",
+              "type": "ByteArray|Integer",
+              "escape": "BigInteger",
+              "decimals": 0
+            }
+          ]
+        },
+        {
+          "name": "value",
+          "type": "ByteArray|Integer",
+          "escape": "BigInteger",
+          "decimals": 8
+        }
+      ],
+      "memo": "?????¨CNNS sell?????¨C????3¡§?????¡§ ????o| addprice"
     }
   ]
 }
