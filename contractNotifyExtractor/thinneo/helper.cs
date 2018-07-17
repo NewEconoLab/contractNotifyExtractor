@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using ThinNeo.Cryptography;
 using ThinNeo.Cryptography.Cryptography;
@@ -210,6 +211,24 @@ namespace ThinNeo
             Array.Copy(scripthash, 0, data, 1, 20);
             var hash = sha256.ComputeHash(data);
             hash = sha256.ComputeHash(hash);
+
+            var alldata = data.Concat(hash.Take(4)).ToArray();
+
+            return Base58.Encode(alldata);
+        }
+        private static ThreadLocal<System.Security.Cryptography.SHA256> threadLocal = new ThreadLocal<System.Security.Cryptography.SHA256>(() => System.Security.Cryptography.SHA256.Create());
+        private static System.Security.Cryptography.SHA256 getSha256()
+        {
+            return threadLocal.Value;
+        }
+        public static string GetAddressFromScriptHash2(Hash160 scripthash)
+        {
+            System.Security.Cryptography.SHA256 sha2562 = getSha256();
+            byte[] data = new byte[20 + 1];
+            data[0] = 0x17;
+            Array.Copy(scripthash, 0, data, 1, 20);
+            var hash = sha2562.ComputeHash(data);
+            hash = sha2562.ComputeHash(hash);
 
             var alldata = data.Concat(hash.Take(4)).ToArray();
 

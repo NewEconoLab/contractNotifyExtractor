@@ -36,7 +36,7 @@ namespace contractNotifyExtractor.lib
                     {
                         try
                         {
-                            result = ThinNeo.Helper.GetAddressFromScriptHash(value.HexString2Bytes());
+                            result = ThinNeo.Helper.GetAddressFromScriptHash2(value.HexString2Bytes());
                         }
                         catch { }
                     }
