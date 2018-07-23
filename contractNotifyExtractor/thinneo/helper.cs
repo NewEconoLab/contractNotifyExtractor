@@ -127,9 +127,11 @@ namespace ThinNeo
             }
             return outd;
         }
-        static System.Security.Cryptography.SHA256 sha256 = System.Security.Cryptography.SHA256.Create();
+        //static System.Security.Cryptography.SHA256 sha256 = System.Security.Cryptography.SHA256.Create();
         //static RIPEMD160Managed ripemd160 = new RIPEMD160Managed();
         //static System.Security.Cryptography.RIPEMD160 ripemd160 = System.Security.Cryptography.RIPEMD160.Create();
+        private static ThreadLocal<System.Security.Cryptography.SHA256> threadLocal = new ThreadLocal<System.Security.Cryptography.SHA256>(() => System.Security.Cryptography.SHA256.Create());
+        private static System.Security.Cryptography.SHA256 sha256 => threadLocal.Value;
 
         public static string GetWifFromPrivateKey(byte[] prikey)
         {
@@ -216,24 +218,7 @@ namespace ThinNeo
 
             return Base58.Encode(alldata);
         }
-        private static ThreadLocal<System.Security.Cryptography.SHA256> threadLocal = new ThreadLocal<System.Security.Cryptography.SHA256>(() => System.Security.Cryptography.SHA256.Create());
-        private static System.Security.Cryptography.SHA256 getSha256()
-        {
-            return threadLocal.Value;
-        }
-        public static string GetAddressFromScriptHash2(Hash160 scripthash)
-        {
-            System.Security.Cryptography.SHA256 sha2562 = getSha256();
-            byte[] data = new byte[20 + 1];
-            data[0] = 0x17;
-            Array.Copy(scripthash, 0, data, 1, 20);
-            var hash = sha2562.ComputeHash(data);
-            hash = sha2562.ComputeHash(hash);
 
-            var alldata = data.Concat(hash.Take(4)).ToArray();
-
-            return Base58.Encode(alldata);
-        }
         //public static string GetAddressFromPublicKey(byte[] publickey)
         //{
         //    byte[] scriptHash = GetScriptHashFromPublicKey(publickey);
