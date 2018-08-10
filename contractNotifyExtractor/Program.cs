@@ -64,168 +64,204 @@ namespace contractNotifyExtractor
             //}
             #endregion
 
-            JArray JA = mh.GetData(readConnStr, readDBname, "notify", "{'notifications.contract':'" + taskContractHash + "',blockindex:{'$gt':" + lastBlockindex + "}}", "{blockindex:1,txid:1}", 1);
+            JArray JA = mh.GetData(readConnStr, readDBname, "notify", "{'notifications.contract':'" + taskContractHash + "',blockindex:{'$gte':" + lastBlockindex + "}}", "{blockindex:-1}", 1);
+            JArray JA2 = mh.GetData(readConnStr, readDBname, "notify", "{'notifications.contract':'" + taskContractHash + "',blockindex:{'$gte':" + lastBlockindex + "}}", "{blockindex:1}", 1);
+            //JArray JA = mh.GetData(readConnStr, readDBname, "notify", "{'notifications.contract':'" + taskContractHash + "',blockindex:{'$gt':" + lastBlockindex + "}}", "{blockindex:1,txid:1}", 1);
             if (JA.Count > 0)
             {
                 //获取已处理块高度的后一个有指定notify的块高度，并以此高度获取所有指定notify
                 Int64 doBlockHeight = Int64.Parse(JA[0]["blockindex"].ToString());
-                JA = mh.GetData(readConnStr, readDBname, "notify", "{blockindex:" + doBlockHeight + "}", "{txid:1}");
+                Int64 doBlockHeight2 = Int64.Parse(JA2[0]["blockindex"].ToString());
+                //JA = mh.GetData(readConnStr, readDBname, "notify", "{blockindex:" + doBlockHeight + "}", "{txid:1}");
+                long start = doBlockHeight2 > lastBlockindex ? doBlockHeight2 : lastBlockindex;
+                for (long index = start; index <= doBlockHeight; ++index) {
+                    JA = mh.GetData(readConnStr, readDBname, "notify", "{blockindex:" + index + "}", "{txid:1}");
 
-                //按块处理所有关联数据,处理好一个块所有数据一起写入
-                JArray JAinsertData = new JArray();
-                foreach (JObject J in JA)
-                {
-                    Int64 blockindex = (Int64)J["blockindex"];
-                    string txid = (string)J["txid"];
-                    JArray JAnotifications = (JArray)J["notifications"];
-
-                    int n = 0;//标记notify在一个tx里的序号
-                    foreach (JObject Jnotify in JAnotifications)
+                    //按块处理所有关联数据,处理好一个块所有数据一起写入
+                    JArray JAinsertData = new JArray();
+                    foreach (JObject J in JA)
                     {
-                        if (Jnotify["state"]["type"].ToString() == "Array")
+                        Int64 blockindex = (Int64)J["blockindex"];
+                        string txid = (string)J["txid"];
+                        JArray JAnotifications = (JArray)J["notifications"];
+
+                        int n = 0;//标记notify在一个tx里的序号
+                        foreach (JObject Jnotify in JAnotifications)
                         {
-                            JArray JAstate = (JArray)Jnotify["state"]["value"];
-
-                            string dataContractHash = Jnotify["contract"].ToString();
-                            string dataNotifyDisplayName = JAstate[0]["value"].ToString().Hexstring2String();
-                            if (dataContractHash == taskContractHash && dataNotifyDisplayName == taskNotifyDisplayName)
+                            if (Jnotify["state"]["type"].ToString() == "Array")
                             {
-                                //Jnotify.Add("blockindex", blockindex);
-                                //Jnotify.Add("txid", txid);
-                                //Jnotify.Add("n", n);
+                                JArray JAstate = (JArray)Jnotify["state"]["value"];
 
-
-                                //存储解析后数据
-                                JObject JnotifyInfo = new JObject();
-                                //下列三项组合为唯一索引
-                                JnotifyInfo.Add("blockindex", blockindex);
-                                JnotifyInfo.Add("txid", txid);
-                                JnotifyInfo.Add("n", n);
-                                //解析数据
-                                //JnotifyInfo.Add("infoDisplayName", dataNotifyDisplayName);
-
-                                int i = 0;
-                                foreach (JObject Jvalue in JAstate)
+                                string dataContractHash = Jnotify["contract"].ToString();
+                                string dataNotifyDisplayName = JAstate[0]["value"].ToString().Hexstring2String();
+                                if (dataContractHash == taskContractHash && dataNotifyDisplayName == taskNotifyDisplayName)
                                 {
-                                    string notifyType = Jvalue["type"].ToString();
+                                    //Jnotify.Add("blockindex", blockindex);
+                                    //Jnotify.Add("txid", txid);
+                                    //Jnotify.Add("n", n);
 
 
-                                    if (notifyType == "Array")//数组类一层展开
+                                    //存储解析后数据
+                                    JObject JnotifyInfo = new JObject();
+                                    //下列三项组合为唯一索引
+                                    JnotifyInfo.Add("blockindex", blockindex);
+                                    JnotifyInfo.Add("txid", txid);
+                                    JnotifyInfo.Add("n", n);
+                                    //解析数据
+                                    //JnotifyInfo.Add("infoDisplayName", dataNotifyDisplayName);
+
+                                    int i = 0;
+                                    foreach (JObject Jvalue in JAstate)
                                     {
-                                        JArray JAarrayValue = (JArray)Jvalue["value"];
+                                        string notifyType = Jvalue["type"].ToString();
 
-                                        int j = 0;
-                                        foreach (JObject JvalueLevel2 in JAarrayValue)
+
+                                        if (notifyType == "Array")//数组类一层展开
                                         {
-                                            string notifyTypeLevel2 = JvalueLevel2["type"].ToString();
-                                            string notifyValueLevel2 = JvalueLevel2["value"].ToString();
-                                            JObject JtaskEscapeInfo = (JObject)((JObject)JAtaskNotifyStructure[i])["arrayData"][j];
+                                            JArray JAarrayValue = (JArray)Jvalue["value"];
+
+                                            int j = 0;
+                                            foreach (JObject JvalueLevel2 in JAarrayValue)
+                                            {
+                                                string notifyTypeLevel2 = JvalueLevel2["type"].ToString();
+                                                string notifyValueLevel2 = JvalueLevel2["value"].ToString();
+                                                JObject JtaskEscapeInfo = (JObject)((JObject)JAtaskNotifyStructure[i])["arrayData"][j];
+
+                                                //如果处理失败则不处理（用原值）
+                                                notifyValueLevel2 = escapeHelper.contractDataEscap(notifyTypeLevel2, notifyValueLevel2, JtaskEscapeInfo);
+
+                                                string taskName = JtaskEscapeInfo["name"].ToString();
+
+                                                try
+                                                {
+                                                    JnotifyInfo.Add(taskName, notifyValueLevel2);
+                                                }
+                                                catch
+                                                {//重名
+                                                    JnotifyInfo.Add("_" + taskName, notifyValueLevel2);
+                                                }
+
+
+                                                j++;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            string notifyValue = Jvalue["value"].ToString();
+                                            JObject JtaskEscapeInfo = (JObject)JAtaskNotifyStructure[i];
 
                                             //如果处理失败则不处理（用原值）
-                                            notifyValueLevel2 = escapeHelper.contractDataEscap(notifyTypeLevel2, notifyValueLevel2, JtaskEscapeInfo);
+                                            notifyValue = escapeHelper.contractDataEscap(notifyType, notifyValue, JtaskEscapeInfo);
 
                                             string taskName = JtaskEscapeInfo["name"].ToString();
-
                                             try
                                             {
-                                                JnotifyInfo.Add(taskName, notifyValueLevel2);
+                                                JnotifyInfo.Add(taskName, notifyValue);
                                             }
                                             catch
                                             {//重名
-                                                JnotifyInfo.Add("_" + taskName, notifyValueLevel2);
+                                                JnotifyInfo.Add("_" + taskName, notifyValue);
                                             }
-
-
-                                            j++;
                                         }
+                                        i++;
                                     }
-                                    else
+
+                                    //记录原数据
+                                    try
                                     {
-                                        string notifyValue = Jvalue["value"].ToString();
-                                        JObject JtaskEscapeInfo = (JObject)JAtaskNotifyStructure[i];
-
-                                        //如果处理失败则不处理（用原值）
-                                        notifyValue = escapeHelper.contractDataEscap(notifyType, notifyValue, JtaskEscapeInfo);
-
-                                        string taskName = JtaskEscapeInfo["name"].ToString();
-                                        try
-                                        {
-                                            JnotifyInfo.Add(taskName, notifyValue);
-                                        }
-                                        catch
-                                        {//重名
-                                            JnotifyInfo.Add("_" + taskName, notifyValue);
-                                        }
+                                        JnotifyInfo.Add("state", Jnotify["state"]);
                                     }
-                                    i++;
-                                }
+                                    catch
+                                    {//重名
+                                        JnotifyInfo.Add("_" + "state", Jnotify["state"]);
+                                    }
 
-                                //记录原数据
-                                try
-                                {
-                                    JnotifyInfo.Add("state", Jnotify["state"]);
-                                }
-                                catch
-                                {//重名
-                                    JnotifyInfo.Add("_" + "state", Jnotify["state"]);
-                                }
+                                    //记录时间
+                                    try
+                                    {
+                                        JnotifyInfo.Add("getTime", DateTime.Now);
+                                    }
+                                    catch
+                                    {//重名
+                                        JnotifyInfo.Add("_" + "getTime", DateTime.Now);
+                                    }
 
-                                //记录时间
-                                try
-                                {
-                                    JnotifyInfo.Add("getTime", DateTime.Now);
-                                }
-                                catch
-                                {//重名
-                                    JnotifyInfo.Add("_" + "getTime", DateTime.Now);
-                                }
+                                    //加入需要写入的数据的组
+                                    JAinsertData.Add(JnotifyInfo);
 
-                                //加入需要写入的数据的组
-                                JAinsertData.Add(JnotifyInfo);
-                            }                           
+                                }
+                            }
+                            n++;
                         }
-                        n++;
                     }
-                }
 
-                try
-                {
-                    //没有入库才入库
-                    if (JAinsertData.Count > 0)
+                    try
                     {
-                        var queryStr = "{blockindex:" + JAinsertData[0]["blockindex"] + ",txid:'" + JAinsertData[0]["txid"] + "',n:" + JAinsertData[0]["n"] + "}";
-                        if (mh.GetData(writeConnStr, writeDBname, taskContractHash, queryStr).Count == 0)
+                        //没有入库才入库
+                        if (JAinsertData.Count > 0)
                         {
-                            //批量写入一个块的所有定义notify
-                            mh.InsertDataByJarray(writeConnStr, writeDBname, taskContractHash, JAinsertData);
-                            //自动添加必要索引(会自动判断索引是否存在，不存在才添加)
-                            //mh.setIndex(writeConnStr, writeDBname, taskContractHash, "{'blockindex':1}", "i_blockindex");
-                            mh.setIndex(writeConnStr, writeDBname, taskContractHash, "{'blockindex':1,'txid':1,'n':1}", "i_blockindex_txid_n", true);
+                            /*
+                            var queryStr = "{blockindex:" + JAinsertData[0]["blockindex"] + ",txid:'" + JAinsertData[0]["txid"] + "',n:" + JAinsertData[0]["n"] + "}";
+                            if (mh.GetData(writeConnStr, writeDBname, taskContractHash, queryStr).Count == 0)
+                            {
+                                //批量写入一个块的所有定义notify
+                                mh.InsertDataByJarray(writeConnStr, writeDBname, taskContractHash, JAinsertData);
+                                //自动添加必要索引(会自动判断索引是否存在，不存在才添加)
+                                //mh.setIndex(writeConnStr, writeDBname, taskContractHash, "{'blockindex':1}", "i_blockindex");
+                                mh.setIndex(writeConnStr, writeDBname, taskContractHash, "{'blockindex':1,'txid':1,'n':1}", "i_blockindex_txid_n", true);
+                            }
+                            else
+                            {
+                                Console.WriteLine("任务ID：" + taskID + "当前高度已入库，自动跳过当前高度" + doBlockHeight);
+                            }
+                            */
+
+
+                            // 当前高度没有处理过则批量入库，正在处理则单个入库 
+                            if (mh.GetDataCount(writeConnStr, writeDBname, taskContractHash, "{'blockindex':" + index + "}") <= 0)
+                            {
+                                //mh.InsertDataByJarray(writeConnStr, writeDBname, taskContractHash, JAinsertData);
+                                // 索引只需创建一次，这里后续待优化...
+                                mh.setIndex(writeConnStr, writeDBname, taskContractHash, "{'blockindex':1,'txid':1,'n':1}", "i_blockindex_txid_n", true);
+                            }
+                            //else
+                            {
+                                foreach (JObject jo in JAinsertData)
+                                {
+                                    JObject filter = (JObject)jo.DeepClone();
+                                    filter.Remove("state");
+                                    if (mh.GetDataCount(writeConnStr, writeDBname, taskContractHash, filter) <= 0)
+                                    {
+                                        mh.InsertData(writeConnStr, writeDBname, taskContractHash, jo);
+                                    }
+                                }
+                            }
+                            Console.WriteLine("任务ID：" + taskID + " 正在处理当前高度 " + index);
+
                         }
                         else
                         {
-                            Console.WriteLine("任务ID：" + taskID + "当前高度已入库，自动跳过当前高度" + doBlockHeight);
+                            Console.WriteLine("任务ID：" + taskID + "当前高度，没有匹配的通知显示名称" + taskNotifyDisplayName + "，自动跳过当前高度");
                         }
+
+                        //更新处理高度
+                        //mh.setContractStorageHeight(writeConnStr, writeDBname, taskContractHash, taskNotifyDisplayName, doBlockHeight);
+                        mh.setContractStorageHeight(writeConnStr, writeDBname, taskContractHash, taskNotifyDisplayName, index);
                     }
-                    else
-                    {
-                        Console.WriteLine("任务ID：" + taskID + "当前高度，没有匹配的通知显示名称" + taskNotifyDisplayName + "，自动跳过当前高度");
+                    catch (Exception ex) {
+                        var e = ex.Message;
                     }
 
-                    //更新处理高度
-                    mh.setContractStorageHeight(writeConnStr, writeDBname, taskContractHash, taskNotifyDisplayName, doBlockHeight);
-                }
-                catch(Exception ex) {
-                    var e = ex.Message;
-                }
+                    isNewDataExist = true;
 
-                isNewDataExist = true;
-
-                Console.WriteLine("任务ID：" + taskID + "已处理到高度：" + doBlockHeight);
+                    //Console.WriteLine("任务ID：" + taskID + "已处理到高度：" + doBlockHeight);
+                    Console.WriteLine("任务ID：" + taskID + "已处理到高度：" + index);
+                }
             }
             else {
-                Console.WriteLine("任务ID：" + taskID + "已入库所有数据，等待新数据产生");
-            }
+                    Console.WriteLine("任务ID：" + taskID + "已入库所有数据，等待新数据产生");
+                }
+            
 
             return isNewDataExist;
         }
@@ -337,6 +373,10 @@ namespace contractNotifyExtractor
             }
 
             Console.ReadKey();
+            while(true)
+            {
+                Thread.Sleep(1000);
+            }
         }
     }
 }

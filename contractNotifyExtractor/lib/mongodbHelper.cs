@@ -62,6 +62,37 @@ namespace contractNotifyExtractor.lib
             client = null;
         }
 
+        // 单个入库
+        public void InsertData(string mongodbConnStr, string mongodbDatabase, string coll, JObject Jdata)
+        {
+            var client = new MongoClient(mongodbConnStr);
+            var database = client.GetDatabase(mongodbDatabase);
+            var collection = database.GetCollection<BsonDocument>(coll);
+            
+            string strData = Newtonsoft.Json.JsonConvert.SerializeObject(Jdata);
+            BsonDocument bson = BsonDocument.Parse(strData);
+            collection.InsertOne(bson);
+
+            client = null;
+        }
+
+        public long GetDataCount(string mongodbConnStr, string mongodbDatabase, string coll, JObject Jdata = null)
+        {
+            return GetDataCount(mongodbConnStr, mongodbDatabase, coll, Jdata == null ? "{}" : Jdata.ToString());
+        }
+        public long GetDataCount(string mongodbConnStr, string mongodbDatabase, string coll, string findBson)
+        {
+            var client = new MongoClient(mongodbConnStr);
+            var database = client.GetDatabase(mongodbDatabase);
+            var collection = database.GetCollection<BsonDocument>(coll);
+
+            var txCount = collection.Find(BsonDocument.Parse(findBson)).Count();
+
+            client = null;
+
+            return txCount;
+        }
+
         public Int64 getContractStorageHeight(string mongodbConnStr, string mongodbDatabase, string contractHash, string displayName)
         {
             var client = new MongoClient(mongodbConnStr);
