@@ -230,6 +230,7 @@ namespace contractNotifyExtractor
                                 {
                                     JObject filter = (JObject)jo.DeepClone();
                                     filter.Remove("state");
+                                    filter.Remove("getTime");
                                     if (mh.GetDataCount(writeConnStr, writeDBname, taskContractHash, filter) <= 0)
                                     {
                                         mh.InsertData(writeConnStr, writeDBname, taskContractHash, jo);
